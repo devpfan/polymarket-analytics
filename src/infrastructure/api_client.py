@@ -44,11 +44,15 @@ class PolymarketAPIClient:
                 markets.append(
                     Market(
                         id=item.get("id", ""),
-                        title=item.get("question", "Desconocido"),  # <--- Cambiado de "title" a "question"
-                        category="General",  # <--- Como no viene la categoría, la dejamos por defecto
+                        title=item.get("question", "Desconocido"),
+                        category="General",
                         volume=float(item.get("volume", 0.0)),
                         probability_yes=prob_yes,
-                        active=item.get("active", True)
+                        active=item.get("active", True),
+                        # Mapeando los nuevos campos:
+                        description=item.get("description", "Sin descripción detallada."),
+                        end_date=item.get("endDate", "No definida"),
+                        resolution_source=item.get("resolutionSource", "Desconocida")
                     )
                 )
 
