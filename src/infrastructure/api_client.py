@@ -57,3 +57,100 @@ class PolymarketAPIClient:
                 )
 
             return markets
+
+    def get_market_by_id(self, market_id: str) -> Market | None:
+        """Busca los detalles completos de un mercado específico por su ID."""
+        with httpx.Client(base_url=self.BASE_URL) as client:
+            response = client.get("/markets", params={"id": market_id})
+            if response.status_code == 200:
+                data = response.json()
+                if data and len(data) > 0:
+                    item = data[0]
+                    prices_raw = item.get("outcomePrices")
+                    import json
+                    prices = []
+                    if prices_raw:
+                        if isinstance(prices_raw, str):
+                            try:
+                                prices = json.loads(prices_raw)
+                            except json.JSONDecodeError:
+                                pass
+                        elif isinstance(prices_raw, list):
+                            prices = prices_raw
+
+                    prob_yes = float(prices[0]) * 100 if prices else 0.0
+
+                    return Market(
+                        id=item.get("id", ""),
+                        title=item.get("question", "Desconocido"),
+                        category="General",
+                        volume=float(item.get("volume", 0.0)),
+                        probability_yes=prob_yes,
+                        active=item.get("active", True),
+                        description=item.get("description", "Sin descripción detallada."),
+                        end_date=item.get("endDate", "No definida"),
+                        resolution_source=item.get("resolutionSource", "Desconocida")
+                    )
+        return None
+
+    def get_all_active_markets(self) -> List[Market]:
+        all_markets = []
+        offset = 0
+        limit = 100
+
+
+        with httpx.Client(base_url=self.BASE_URL, timeout=30.0) as client:
+            while True:
+                # Condición de salida para la prueba rápida
+
+
+                params = {
+                    "active": "true",
+                    "closed": "false",
+                    "limit": limit,
+                    "offset": offset
+                }
+
+                response = client.get("/markets", params=params)
+                if response.status_code != 200:
+                    break
+
+                data = response.json()
+                if not data:
+                    break
+
+                for item in data:
+                    prices_raw = item.get("outcomePrices")
+                    import json
+                    prices = []
+                    if prices_raw:
+                        if isinstance(prices_raw, str):
+                            try:
+                                prices = json.loads(prices_raw)
+                            except json.JSONDecodeError:
+                                pass
+                        elif isinstance(prices_raw, list):
+                            prices = prices_raw
+
+                    prob_yes = float(prices[0]) * 100 if prices else 0.0
+
+                    all_markets.append(
+                        Market(
+                            id=item.get("id", ""),
+                            title=item.get("question", "Desconocido"),
+                            category="General",
+                            volume=float(item.get("volume", 0.0)),
+                            probability_yes=prob_yes,
+                            active=item.get("active", True),
+                            description=item.get("description", "Sin descripción."),
+                            end_date=item.get("endDate", "No definida"),
+                            resolution_source=item.get("resolutionSource", "Desconocida")
+                        )
+                    )
+
+                if len(data) < limit:
+                    break
+
+                offset += limit
+
+        return all_markets
