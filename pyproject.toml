@@ -1,0 +1,21 @@
+[project]
+name = "pollymarket-analytics"
+version = "0.1.0"
+description = "Pollymarket Analytics Dashboard"
+authors = [
+    {name = "devpfan",email = "pfabian@outlook.com"}
+]
+requires-python = "^3.11"
+dependencies = [
+    "streamlit (>=1.57.0,<2.0.0)",
+    "pandas (>=3.0.3,<4.0.0)",
+    "httpx (>=0.28.1,<0.29.0)",
+    "pydantic (>=2.13.4,<3.0.0)",
+    "sqlalchemy (>=2.0.49,<3.0.0)",
+    "psycopg2-binary (>=2.9.12,<3.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
